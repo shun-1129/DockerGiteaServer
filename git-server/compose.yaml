@@ -68,7 +68,7 @@ services:
       GITEA_INSTANCE_URL: http://gitea:3000/
       GITEA_RUNNER_REGISTRATION_TOKEN: ${GITEA_RUNNER_TOKEN}
       GITEA_RUNNER_NAME: docker-runner
-      GITEA_RUNNER_LABELS: ubuntu-latest:docker://node:20-bookworm
+      GITEA_RUNNER_LABELS: ubuntu-latest:docker://docker.gitea.com/runner-images:ubuntu-latest
 
     volumes:
       - ./runner:/data
