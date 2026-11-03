@@ -1,0 +1,51 @@
+services:
+  postgres:
+    image: postgres:17
+    container_name: git-server-postgres
+    restart: unless-stopped
+
+    environment:
+      POSTGRES_USER: ${POSTGRES_USER}
+      POSTGRES_PASSWORD: ${POSTGRES_PASSWORD}
+      POSTGRES_DB: ${POSTGRES_DB}
+
+    ports:
+      - "127.0.0.1:${POSTGRES_PORT}:5432"
+
+    volumes:
+      - ./postgres:/var/lib/postgresql/data
+
+    healthcheck:
+      test: ["CMD-SHELL", "pg_isready -U ${POSTGRES_USER} -d ${POSTGRES_DB}"]
+      interval: 10s
+      timeout: 5s
+      retries: 5
+
+  gitea:
+    image: gitea/gitea:latest
+    container_name: git-server-gitea
+    restart: unless-stopped
+
+    depends_on:
+      postgres:
+        condition: service_healthy
+
+    environment:
+      USER_UID: 1000
+      USER_GID: 1000
+
+      GITEA__database__DB_TYPE: postgres
+      GITEA__database__HOST: postgres:5432
+      GITEA__database__NAME: ${POSTGRES_DB}
+      GITEA__database__USER: ${POSTGRES_USER}
+      GITEA__database__PASSWD: ${POSTGRES_PASSWORD}
+
+      GITEA__server__DOMAIN: localhost
+      GITEA__server__ROOT_URL: http://localhost:${GITEA_PORT}/
+      GITEA__server__HTTP_PORT: 3000
+
+    ports:
+      - "127.0.0.1:${GITEA_PORT}:3000"
+
+    volumes:
+      - ./gitea:/data
